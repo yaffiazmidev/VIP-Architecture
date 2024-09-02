@@ -17,6 +17,9 @@
 		3C5E81C82C85E7ED0069A787 /* VIP_ArchitectureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5E81C72C85E7ED0069A787 /* VIP_ArchitectureTests.swift */; };
 		3C5E81D22C85E7ED0069A787 /* VIP_ArchitectureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5E81D12C85E7ED0069A787 /* VIP_ArchitectureUITests.swift */; };
 		3C5E81D42C85E7ED0069A787 /* VIP_ArchitectureUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5E81D32C85E7ED0069A787 /* VIP_ArchitectureUITestsLaunchTests.swift */; };
+		3C8A7D792C866B63004A52C8 /* DENNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 3C8A7D782C866B63004A52C8 /* DENNetworking */; };
+		3C8A7D7E2C866CF6004A52C8 /* MovieListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C8A7D7D2C866CF6004A52C8 /* MovieListController.swift */; };
+		3C8A7D812C866D36004A52C8 /* MovieListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C8A7D802C866D36004A52C8 /* MovieListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +54,8 @@
 		3C5E81CD2C85E7ED0069A787 /* VIP-ArchitectureUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "VIP-ArchitectureUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C5E81D12C85E7ED0069A787 /* VIP_ArchitectureUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VIP_ArchitectureUITests.swift; sourceTree = "<group>"; };
 		3C5E81D32C85E7ED0069A787 /* VIP_ArchitectureUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VIP_ArchitectureUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		3C8A7D7D2C866CF6004A52C8 /* MovieListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListController.swift; sourceTree = "<group>"; };
+		3C8A7D802C866D36004A52C8 /* MovieListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C8A7D792C866B63004A52C8 /* DENNetworking in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,6 +107,7 @@
 		3C5E81AC2C85E7EC0069A787 /* VIP-Architecture */ = {
 			isa = PBXGroup;
 			children = (
+				3C8A7D7A2C866C43004A52C8 /* MovieList */,
 				3C5E81AD2C85E7EC0069A787 /* AppDelegate.swift */,
 				3C5E81AF2C85E7EC0069A787 /* SceneDelegate.swift */,
 				3C5E81B12C85E7EC0069A787 /* ViewController.swift */,
@@ -130,6 +137,23 @@
 			path = "VIP-ArchitectureUITests";
 			sourceTree = "<group>";
 		};
+		3C8A7D7A2C866C43004A52C8 /* MovieList */ = {
+			isa = PBXGroup;
+			children = (
+				3C8A7D7F2C866D2D004A52C8 /* Views */,
+				3C8A7D7D2C866CF6004A52C8 /* MovieListController.swift */,
+			);
+			path = MovieList;
+			sourceTree = "<group>";
+		};
+		3C8A7D7F2C866D2D004A52C8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				3C8A7D802C866D36004A52C8 /* MovieListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -146,6 +170,9 @@
 			dependencies = (
 			);
 			name = "VIP-Architecture";
+			packageProductDependencies = (
+				3C8A7D782C866B63004A52C8 /* DENNetworking */,
+			);
 			productName = "VIP-Architecture";
 			productReference = 3C5E81AA2C85E7EC0069A787 /* VIP-Architecture.app */;
 			productType = "com.apple.product-type.application";
@@ -218,6 +245,9 @@
 				Base,
 			);
 			mainGroup = 3C5E81A12C85E7EC0069A787;
+			packageReferences = (
+				3C8A7D772C866B63004A52C8 /* XCRemoteSwiftPackageReference "DENNetworking" */,
+			);
 			productRefGroup = 3C5E81AB2C85E7EC0069A787 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -261,10 +291,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C8A7D7E2C866CF6004A52C8 /* MovieListController.swift in Sources */,
 				3C5E81B22C85E7EC0069A787 /* ViewController.swift in Sources */,
 				3C5E81AE2C85E7EC0069A787 /* AppDelegate.swift in Sources */,
 				3C5E81B82C85E7EC0069A787 /* VIP_Architecture.xcdatamodeld in Sources */,
 				3C5E81B02C85E7EC0069A787 /* SceneDelegate.swift in Sources */,
+				3C8A7D812C866D36004A52C8 /* MovieListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -605,6 +637,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3C8A7D772C866B63004A52C8 /* XCRemoteSwiftPackageReference "DENNetworking" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yaffiazmidev/DENNetworking.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3C8A7D782C866B63004A52C8 /* DENNetworking */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3C8A7D772C866B63004A52C8 /* XCRemoteSwiftPackageReference "DENNetworking" */;
+			productName = DENNetworking;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		3C5E81B62C85E7EC0069A787 /* VIP_Architecture.xcdatamodeld */ = {
