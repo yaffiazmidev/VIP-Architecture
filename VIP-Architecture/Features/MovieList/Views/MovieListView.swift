@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol MovieListViewDelegate: AnyObject {
+    func loadMore()
+}
+
 class MovieListView: UIView {
     
     private lazy var collectionView: UICollectionView = {
@@ -16,7 +20,16 @@ class MovieListView: UIView {
         return view
     }()
     
-    override init(frame: CGRect) {
+    weak var delegate: MovieListViewDelegate?
+    private let imageDataLoader: ImageDataLoader
+    
+    private var nowPlayingMovies: [NowPlayingItemViewModel] = []
+    
+    init(
+        frame: CGRect = .zero,
+        imageDataLoader: ImageDataLoader
+    ) {
+        self.imageDataLoader = imageDataLoader
         super.init(frame: frame)
         setupView()
     }
@@ -31,8 +44,19 @@ class MovieListView: UIView {
 }
 
 extension MovieListView {
+    func setNowPlaying(movies: [NowPlayingItem]) {
+        nowPlayingMovies = movies.asCardItem
+        collectionView.reloadData()
+    }
+    
+    func appendNowPlaying(movies: [NowPlayingItem]) {
+        nowPlayingMovies.append(contentsOf: movies.asCardItem)
+        collectionView.reloadData()
+    }
+}
+
+extension MovieListView {
     private func configureUI() {
-        backgroundColor = .red
         configureCollectionView()
     }
     
@@ -40,10 +64,12 @@ extension MovieListView {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.showsVerticalScrollIndicator = false
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.registerCell(PopularMovieCollectionViewCell.self)
+        collectionView.contentInset.top = 30
+        collectionView.contentInset.bottom = 20
+        collectionView.registerCell(NowPlayingCollectionViewCell.self)
         
         addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 0),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
@@ -57,14 +83,16 @@ extension MovieListView: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, 
                         numberOfItemsInSection section: Int) -> Int {
-        return 20
+        return nowPlayingMovies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, 
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell: PopularMovieCollectionViewCell = collectionView.dequeueReusableCell(at: indexPath)
-        cell.contentView.backgroundColor = .blue
-        cell.configure(with: "\(indexPath)")
+        let cell: NowPlayingCollectionViewCell = collectionView.dequeueReusableCell(at: indexPath)
+        cell.fill(
+            with: nowPlayingMovies[indexPath.item],
+            imageDataLoader: imageDataLoader
+        )
         return cell
     }
 }
@@ -73,7 +101,13 @@ extension MovieListView: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, 
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return .init(width: frame.width, height: 200)
+        return .init(width: frame.width, height: 150)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 16
     }
 }
 
@@ -81,5 +115,29 @@ extension MovieListView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, 
                         didSelectItemAt indexPath: IndexPath) {
         print(indexPath)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard scrollView.isDragging else { return }
+        
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        if (offsetY > contentHeight - scrollView.frame.height) {
+            delegate?.loadMore()
+        }
+    }
+}
+
+extension Array where Element == NowPlayingItem {
+    var asCardItem: [NowPlayingItemViewModel] {
+        return map { item in
+            NowPlayingItemViewModel(
+                id: item.id,
+                title: item.title,
+                imagePath: item.imagePath,
+                releaseDate: item.releaseDate,
+                genre: "\(item.genreIds)"
+            )
+        }
     }
 }

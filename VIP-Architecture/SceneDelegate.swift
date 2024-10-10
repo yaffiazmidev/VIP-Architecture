@@ -11,59 +11,92 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let windowScene = (scene as? UIWindowScene) else { return }
-        
-        window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = UINavigationController(rootViewController: makeMovieListController())
-        window?.makeKeyAndVisible()
-    }
+    private lazy var baseURL = URL(string: "https://api.themoviedb.org")!
+    private lazy var imageBaseURL = URL(string: "https://image.tmdb.org")!
+    private lazy var navigationController = UINavigationController()
+    private lazy var config: APIConfig = getConfig(fromPlist: "APIConfig")
     
-    private func makeMovieListController() -> MovieListController {
-        let presenter = MovieListPresenter()
-        let interactor = MovieListInteractor(presenter: presenter)
-        let controller = MovieListController(interactor: interactor)
+    lazy var httpClient: HTTPClient = {
+        return makeHTTPClient().httpClient
+    }()
+    
+    lazy var authenticatedHTTPClient: HTTPClient = {
+        return makeHTTPClient(with: config).authHTTPClient
+    }()
+    
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
         
-        presenter.controller = controller
-        
-        return controller
-    }
-
-    func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
-    }
-
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-    }
-
-    func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
-    }
-
-    func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        configureRootController(windowScene: windowScene)
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
-
-        // Save changes in the application's managed object context when the application transitions to the background.
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
-
-
 }
 
+extension SceneDelegate {
+    private func configureRootController(windowScene: UIWindowScene) {
+        let window = UIWindow(windowScene: windowScene)
+        let navigationController = UINavigationController()
+        navigationController.setViewControllers([makeMovieListController()], animated: true)
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
+        self.window = window
+    }
+}
+
+extension SceneDelegate {
+    private func makeMovieListController() -> MovieListController {
+        let nowPlayingLoader = RemoteNowPlayingLoader(
+            baseURL: baseURL,
+            client: authenticatedHTTPClient
+        )
+        
+        let imageDataLoader = RemoteImageDataLoader(
+            baseURL: imageBaseURL,
+            client: authenticatedHTTPClient
+        )
+        
+        let view = MovieListView(imageDataLoader: imageDataLoader)
+        let controller = MovieListController(view: view)
+        let presenter = MovieListPresenter(controller: controller)
+        let interactor = MovieListInteractor(
+            presenter: presenter,
+            nowPlayingLoader: MainQueueDispatchDecorator(nowPlayingLoader)
+        )
+        
+        controller.interactor = interactor
+        view.delegate = controller
+        
+        return controller
+    }
+}
+
+extension MainQueueDispatchDecorator: ImageDataLoader where T == ImageDataLoader {
+    typealias Result = ImageDataLoader.Result
+    
+    func load(from imageURL: URL, completion: @escaping (Result) -> Void) -> any ImageDataLoaderTask {
+        decoratee.load(from: imageURL) { [weak self] result in
+            self?.dispatch { completion(result) }
+        }
+    }
+    
+    func load(with imagePath: String, width: Int, completion: @escaping (Result) -> Void) -> any ImageDataLoaderTask {
+        decoratee.load(with: imagePath, width: width) { [weak self] result in
+            self?.dispatch { completion(result) }
+        }
+    }
+}
+
+
+extension MainQueueDispatchDecorator: NowPlayingLoader where T == NowPlayingLoader {
+    public func load(_ request: PagedNowPlayingRequest,
+                     completion: @escaping (NowPlayingLoader.Result) -> Void) {
+        decoratee.load(request) { [weak self] result in
+            self?.dispatch { completion(result) }
+        }
+    }
+}
