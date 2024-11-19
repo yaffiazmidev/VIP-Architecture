@@ -17,9 +17,11 @@ class MovieListController: UIViewController {
     private let mainView: MovieListView
     
     public var interactor: IMovieListInteractor?
+    private let genreLoader: GenreLoader
     
-    init(view: MovieListView) {
+    init(view: MovieListView, genreLoader: GenreLoader) {
         mainView = view
+        self.genreLoader = genreLoader
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -38,15 +40,19 @@ class MovieListController: UIViewController {
 }
 
 extension MovieListController: MovieListViewDelegate {
-    func loadMore() {
-        interactor?.currentPage += 1
-        interactor?.fetchNowPlaying()
+    func didSelectMovie(_ movie: NowPlayingItemViewModel) {
+        let detailController = MovieDetailController(
+            viewModel: movie,
+            imageDataLoader: mainView.imageDataLoader,
+            genreLoader: genreLoader
+        )
+        present(detailController, animated: true)
     }
 }
 
 extension MovieListController: MovieListControllerDisplayLogic {
     func displayNowPlaying(with items: [NowPlayingItem], currentPage: Int) {
-        currentPage == 1 ? mainView.setNowPlaying(movies: items) : mainView.appendNowPlaying(movies: items)
+        mainView.appendNowPlaying(movies: items)
     }
     
     func displayError(with error: Error) {

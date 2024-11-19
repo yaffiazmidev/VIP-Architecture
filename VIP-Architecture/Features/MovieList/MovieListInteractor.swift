@@ -10,17 +10,18 @@ import DENNetworking
 
 protocol MovieListBusinessLogic {
     func fetchNowPlaying()
+    func loadMoreNowPlaying()
 }
 
 protocol MovieListDataStore {
-    var currentPage: Int { get set }
+    
 }
 
 typealias IMovieListInteractor = MovieListBusinessLogic & MovieListDataStore
 
 class MovieListInteractor: IMovieListInteractor {
     
-    var currentPage: Int = 1
+    private var currentPage: Int = 1
     private let presenter: MovieListPresentingLogic
     private let nowPlayingLoader: NowPlayingLoader
     
@@ -37,5 +38,10 @@ class MovieListInteractor: IMovieListInteractor {
             
             self.presenter.presentNowPlayingFeed(with: result)
         }
+    }
+    
+    func loadMoreNowPlaying() {
+        currentPage += 1
+        fetchNowPlaying()
     }
 }

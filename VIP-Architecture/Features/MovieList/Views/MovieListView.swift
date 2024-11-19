@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MovieListViewDelegate: AnyObject {
-    func loadMore()
+    func didSelectMovie(_ movie: NowPlayingItemViewModel)
 }
 
 class MovieListView: UIView {
@@ -20,8 +20,9 @@ class MovieListView: UIView {
         return view
     }()
     
+    let imageDataLoader: ImageDataLoader
     weak var delegate: MovieListViewDelegate?
-    private let imageDataLoader: ImageDataLoader
+    var handleLoadMoreNowPlaying: (() -> Void)?
     
     private var nowPlayingMovies: [NowPlayingItemViewModel] = []
     
@@ -114,7 +115,8 @@ extension MovieListView: UICollectionViewDelegateFlowLayout {
 extension MovieListView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, 
                         didSelectItemAt indexPath: IndexPath) {
-        print(indexPath)
+        let movie = nowPlayingMovies[indexPath.item]
+        delegate?.didSelectMovie(movie)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -123,7 +125,7 @@ extension MovieListView: UICollectionViewDelegate {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         if (offsetY > contentHeight - scrollView.frame.height) {
-            delegate?.loadMore()
+            handleLoadMoreNowPlaying?()
         }
     }
 }
