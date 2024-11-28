@@ -60,15 +60,11 @@ extension SceneDelegate {
             client: authenticatedHTTPClient
         )
         
-        let genreLoader = RemoteGenreLoader(
-            baseURL: baseURL,
-            client: authenticatedHTTPClient
-        )
-        
         let view = MovieListView(
             imageDataLoader: MainQueueDispatchDecorator(imageDataLoader)
         )
-        let controller = MovieListController(view: view, genreLoader: MainQueueDispatchDecorator(genreLoader))
+        
+        let controller = MovieListController(view: view)
         let presenter = MovieListPresenter(controller: controller)
         let interactor = MovieListInteractor(
             presenter: presenter,
@@ -103,14 +99,6 @@ extension MainQueueDispatchDecorator: ImageDataLoader where T == ImageDataLoader
 extension MainQueueDispatchDecorator: NowPlayingLoader where T == NowPlayingLoader {
     public func load(_ request: PagedNowPlayingRequest,
                      completion: @escaping (NowPlayingLoader.Result) -> Void) {
-        decoratee.load(request) { [weak self] result in
-            self?.dispatch { completion(result) }
-        }
-    }
-}
-
-extension MainQueueDispatchDecorator: GenreLoader where T == GenreLoader {
-    public func load(_ request: GenreRequest, completion: @escaping (GenreLoader.Result) -> Void) {
         decoratee.load(request) { [weak self] result in
             self?.dispatch { completion(result) }
         }
